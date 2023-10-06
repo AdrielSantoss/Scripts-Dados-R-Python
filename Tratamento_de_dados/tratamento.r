@@ -16,10 +16,24 @@ head(dados) # Nesses dados, existem dois tipo de dados categórios (estado e gen
 # 1.1 Estado (dados categóricos)
 counts <- table(dados$Estado)
 print(counts) # Criando uma tabela com os estados
-barplot(counts, main = "Estados", xlab = "Estados")
+barplot(counts, main = "Estados", xlab = "Estados") # função para criar Gráfico de barras
 
 # 1.2 Gênero (dados categóricos)
 countsGenero <- table(dados$Genero)
 print(countsGenero) # Criando uma tabela com os generos
 barplot(countsGenero, main = "Gêneros", xlab = "Gêneros")
 
+# 1.2 Idade
+summary(dados$Idade)
+boxplot(dados$Idade)
+hist(dados$Idade) # Histograma
+
+# 1.3 Saldo
+summary(dados$Saldo)
+boxplot(dados$Saldo)
+hist(dados$Saldo)
+
+# 1.3 Salário
+summary(dados$Saldo)
+boxplot(dados$Salario)
+boxplot(dados$Salario, outline = F)
