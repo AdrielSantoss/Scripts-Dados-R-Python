@@ -21,7 +21,7 @@ Estados = dadosCsv['Estado'] %>% distinct() #  Pipe operator: %>%
 jsonText = '{'
 lastEl = Estados$Estado[length(Estados$Estado)]
 
-for (col in Estados$Estado) { #col duplicado aqui
+for (col in Estados$Estado) {
     jsonText = paste(jsonText, str_interp('"${col}": []'))
     
     if(col != lastEl) {
