@@ -1,42 +1,55 @@
-library("jsonlite")  # jsonlite, pacote de manipulação de JSON
-library("dplyr") # dplyer pacote de manipulação de dados para o R
-library("rlist") # dplyer pacote de manipulação de LISTAS para o R
-library("stringr") # stringr, pacote que adiciona metodos para manipular strings
+library("jsonlite")
+library("dplyr")
+library("rlist")
+library("stringr")
+
+# PARAMETROS DE ENTRADA
+csv_name <- "clientes.csv"
+json_name <- "clientes.json"
+grouper_param <- NA
 
 # LEITURA DE ARQUIVO CSV
-dados_csv <- read.csv("Churn.csv", sep = ";", na.strings = "")
+dados_csv <- read.csv(str_interp("${csv_name}"), sep = ";", na.strings = "")
 col_names <- colnames(dados_csv)
 
-# PARAMETRO AGRUPADOR
-grouper_param <- "Estado"
-
-if (!(grouper_parameter %in% col_names)) {
-  stop(str_interp("O campo ${grouper_parameter} não existe no arquivo CSV")) # problema aqui, nao esta parando o script
+if (!is.na(grouper_param) && !(grouper_parameter %in% col_names)) {
+  stop(str_interp("O campo ${grouper_parameter} não existe no arquivo CSV"))
 }
 
-groupers <- dados_csv[grouper_param] %>% distinct() #  AGRUPADORES
-groupers[is.na(groupers)] <- "Not grouped" #  AGRUPADORES NULOS
+groupers <- dados_csv[grouper_param] %>% distinct()
+groupers[is.na(groupers)] <- "Not grouped"
 
-# MONTANDO LIST DE DATAFRAMES PARA CONVERSÃO JSON
-json_content <- list()
+# FUNÇÃO DE CRIAÇÃO DA ESTRUTURA DE DADOS PARA CONVERSÃO JSON
+create_json_structure <- function(data) {
+  json_df <- data.frame(matrix(ncol = length(col_names), nrow = 0))
+  colnames(json_df) <- col_names
 
-for (grouper in groupers[[grouper_param]]) {
-  infos <- dados_csv[dados_csv[[grouper_param]] == grouper, ]
-  df <- data.frame(matrix(ncol = length(col_names), nrow = 0))
-  colnames(df) <- col_names
-
-  for (row in 1:nrow(infos)) {
-    for (key in col_names) {
-      value <- infos[row, ][key]
+  for (row in seq_len(1):nrow(data)) {
+    for (column in col_names) {
+      value <- data[row, ][column]
 
       if (!is.null(value) && !is.na(value)) {
-        df[row, key] <- value
+        json_df[row, column] <- value
       }
     }
   }
 
-  json_content <- list.append(json_content, df)
+  return(json_df)
 }
 
-names(json_content) <- groupers[[grouper_param]]
-write(toJSON(json_content, rownames=FALSE), "myJSON.json")
+# REALIZANDO CONVERSÃO JSON
+json_content <- list()
+
+if (is.na(grouper_param)) {
+  json_content <- create_json_structure(dados_csv)
+} else {
+  for (grouper in groupers[[grouper_param]]) {
+    grouped_data <- dados_csv[dados_csv[[grouper_param]] == grouper, ]
+
+    json_content <- list.append(json_content,
+                                create_json_structure(grouped_data))
+  }
+  names(json_content) <- groupers[[grouper_param]]
+}
+
+write(toJSON(json_content, rownames = FALSE), str_interp("${json_name}"))

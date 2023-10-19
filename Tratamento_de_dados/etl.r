@@ -1,23 +1,14 @@
-# Criando um ETL básico, cujo objetivo é ler, transformar os dados CSV e carregar estes dados em formato JSON.
-# Todo dado que for NA converter em null
-# Os dados devem ser organizados por objetos no JSON, separes por ESTADO
-
 # PACKAGES
 library("jsonlite")  # jsonlite, pacote de manipulação de JSON
 library("dplyr") # dplyer pacote de manipulação de dados para o R
 library("stringr") # stringr, pacote que adiciona metodos para manipular strings
 
 # LEITURA DE ARQUIVO CSV
-dados_csv <- read.csv("Churn.csv", sep = ";", na.strings = "")
-
-colnames(dados_csv) <- c("Id", "Score", "Estado", "Genero", "Idade",
-                         "Patrimonio", "Saldo", "Produtos", "TemCartCredito",
-                         "Ativo", "Salario", "Saiu")
-
+dados_csv <- read.csv("clientes.csv", sep = ";", na.strings = "")
 col_names <- colnames(dados_csv) # LENDO OS NOMES DAS COLUNAS
 
 # REMOVENDO ESTADOS DUPLICADOS
-Estados <- dados_csv['Estado'] %>% distinct() #  Pipe operator: %>%
+Estados <- dados_csv['Estado'] %>% distinct()
 Estados[is.na(Estados)] <- "Not grouped"
 
 # CONSTRUINDO STRING JSON
