@@ -1,4 +1,4 @@
-X0;X1;X2;X3;X4;X4;X6;X7;X8;X9;X10;X11
+Id;Score;Estado;Genero;Idade;Patrimonio;Saldo;Produtos;TemCartaoCredito;Ativo;Salario;Saiu
 1;619;RS;Feminino;42;2;0;1;1;1;10134888;1
 2;608;SC;Feminino;41;1;8380786;1;0;1;11254258;0
 3;502;RS;Feminino;42;8;1596608;3;1;0;11393157;1
