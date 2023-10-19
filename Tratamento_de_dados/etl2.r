@@ -1,48 +1,42 @@
 library("jsonlite")  # jsonlite, pacote de manipulação de JSON
 library("dplyr") # dplyer pacote de manipulação de dados para o R
+library("rlist") # dplyer pacote de manipulação de LISTAS para o R
 library("stringr") # stringr, pacote que adiciona metodos para manipular strings
-library('rlist')
 
 # LEITURA DE ARQUIVO CSV
 dados_csv <- read.csv("Churn.csv", sep = ";", na.strings = "")
+col_names <- colnames(dados_csv)
 
-colnames(dados_csv) <- c("Id", "Score", "Estado", "Genero", "Idade",
-                         "Patrimonio", "Saldo", "Produtos", "TemCartCredito",
-                         "Ativo", "Salario", "Saiu")
+# PARAMETRO AGRUPADOR
+grouper_param <- "Estado"
 
-col_names <- colnames(dados_csv) # LENDO OS NOMES DAS COLUNAS
+if (!(grouper_parameter %in% col_names)) {
+  stop(str_interp("O campo ${grouper_parameter} não existe no arquivo CSV")) # problema aqui, nao esta parando o script
+}
 
+groupers <- dados_csv[grouper_param] %>% distinct() #  AGRUPADORES
+groupers[is.na(groupers)] <- "Not grouped" #  AGRUPADORES NULOS
 
-colnames(dados_csv) <- c("Id", "Score", "Estado", "Genero", "Idade",
-                         "Patrimonio", "Saldo", "Produtos", "TemCartCredito",
-                         "Ativo", "Salario", "Saiu")
+# MONTANDO LIST DE DATAFRAMES PARA CONVERSÃO JSON
+json_content <- list()
 
-col_names <- colnames(dados_csv) # LENDO OS NOMES DAS COLUNAS
-
-df <- data.frame(matrix(ncol = length(col_names), nrow = 0))
-colnames(df) <- col_names
-# df[2, 'Id'] = 1 ADICIONANDO VALORES NUM DATA FRAME VAZIO COM COLUNAS
-
-Estados <- dados_csv['Estado'] %>% distinct() #  AGRUPADORES
-Estados[is.na(Estados)] <- "Not grouped" #  AGRUPADORES NULOS
-
-json_content = list()
-
-for (grouper in Estados$Estado) {
-  infos <- dados_csv[dados_csv$Estado == grouper, ]
-  df <- data.frame(matrix(ncol = length(col_names), nrow = 0)) # 7 DATA FRAMES
+for (grouper in groupers[[grouper_param]]) {
+  infos <- dados_csv[dados_csv[[grouper_param]] == grouper, ]
+  df <- data.frame(matrix(ncol = length(col_names), nrow = 0))
   colnames(df) <- col_names
 
   for (row in 1:nrow(infos)) {
     for (key in col_names) {
       value <- infos[row, ][key]
-      df[row, key] <- value
+
+      if (!is.null(value) && !is.na(value)) {
+        df[row, key] <- value
+      }
     }
   }
 
-  json_content = list.append(json_content, df)
+  json_content <- list.append(json_content, df)
 }
 
-names(json_content) = Estados$Estado
-
-write(toJSON(json_content), "myJSON.json")
+names(json_content) <- groupers[[grouper_param]]
+write(toJSON(json_content, rownames=FALSE), "myJSON.json")
