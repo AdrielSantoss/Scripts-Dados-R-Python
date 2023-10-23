@@ -6,7 +6,7 @@ library("stringr")
 # PARAMETROS DE ENTRADA
 csv_name <- "clientes.csv"
 json_name <- "clientes.json"
-grouper_param <- NA
+grouper_param <- "Estado"
 
 # LEITURA DE ARQUIVO CSV
 dados_csv <- read.csv(str_interp("${csv_name}"), sep = ";", na.strings = "")
