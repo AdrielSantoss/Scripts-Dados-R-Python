@@ -1,19 +1,34 @@
+library("optparse")
 library("jsonlite")
-library("dplyr")
+suppressWarnings(suppressMessages(library("dplyr")))
 library("rlist")
 library("stringr")
 
+option_list <- list(
+  make_option(c("-p", "--pathcsv"), help = "CSV file path"),
+  make_option(c("-n", "--jsonname"), default = "converted_data", help = "JSON file name [Default is converted_data.json]"),
+  make_option(c("-s", "--sepatorcsv"), default = ";", help = "CSV data separator"),
+  make_option(c("-g", "--grouper"), help = "Data grouping column")
+)
+
+parser <- OptionParser(option_list=option_list)
+args <- parse_args(parser, positional_arguments = 0)
+opt <- args$options
+
 # PARAMETROS DE ENTRADA
-csv_name <- "clientes.csv"
-json_name <- "clientes.json"
-grouper_param <- "Estado"
+path_csv <- ifelse(is.null(opt$pathcsv), file.choose(), opt$pathcsv)
+json_name <- opt$jsonname
+grouper_param <- opt$grouper
+separator_csv <- opt$sepatorcsv
 
 # LEITURA DE ARQUIVO CSV
-dados_csv <- read.csv(str_interp("${csv_name}"), sep = ";", na.strings = "")
+dados_csv <- read.csv(path_csv, sep = separator_csv, na.strings = "")
 col_names <- colnames(dados_csv)
+row_numbers <- dim(dados_csv)[1]
+col_numbers <- dim(dados_csv)[2]
 
-if (!is.na(grouper_param) && !(grouper_parameter %in% col_names)) {
-  stop(str_interp("O campo ${grouper_parameter} não existe no arquivo CSV"))
+if (!is.null(grouper_param) && !(grouper_param %in% col_names)) {
+  stop(str_interp("O campo ${grouper_param} não existe no arquivo CSV"))
 }
 
 groupers <- dados_csv[grouper_param] %>% distinct()
@@ -27,12 +42,12 @@ create_json_structure <- function(data) {
   for (row in seq_len(1):nrow(data)) {
     for (column in col_names) {
       value <- data[row, ][column]
-
       if (!is.null(value) && !is.na(value)) {
         json_df[row, column] <- value
       }
     }
   }
+
 
   return(json_df)
 }
@@ -40,7 +55,9 @@ create_json_structure <- function(data) {
 # REALIZANDO CONVERSÃO JSON
 json_content <- list()
 
-if (is.na(grouper_param)) {
+cat(str_interp("Converting CSV with ${row_numbers} rows and ${col_numbers} columns...\n"))
+
+if (is.null(grouper_param)) {
   json_content <- create_json_structure(dados_csv)
 } else {
   for (grouper in groupers[[grouper_param]]) {
@@ -52,4 +69,5 @@ if (is.na(grouper_param)) {
   names(json_content) <- groupers[[grouper_param]]
 }
 
-write(toJSON(json_content, rownames = FALSE), str_interp("${json_name}"))
+write(toJSON(json_content, rownames = FALSE), str_interp("${json_name}.json"))
+cat("Conversion completed successfully")
