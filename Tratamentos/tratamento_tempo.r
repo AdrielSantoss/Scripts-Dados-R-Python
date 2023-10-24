@@ -14,12 +14,12 @@ temperatura_median <- median(dados_tempo$Temperatura)
 dados_tempo[dados_tempo$Temperatura > 130 |
               dados_tempo$Temperatura < -130, ] <- temperatura_median
 
-# Umidade
+# Umidade (numérico)
 summary(dados_tempo$Umidade)
 umidade_median <- median(dados_tempo$Umidade, na.rm = TRUE)
 dados_tempo[is.na(dados_tempo$Umidade), ]["Umidade"] <- umidade_median
 
-# Jogar
+# Jogar (fatorial)
 unique(dados_tempo$Jogar)
 table(dados_tempo$Jogar)
 dados_tempo[(dados_tempo$Jogar != "nao" & dados_tempo$Jogar != "sim"), ]["Jogar"] <- "sim"
