@@ -1,3 +1,4 @@
+import pandas as pd
 import numpy as np
 
 x = 1  # Inteiro
@@ -34,3 +35,16 @@ animais = {'gato', 'cachorro'}
 # Numpy
 a = np.array([1, 12, 23, 27])
 print(a.dtype)
+
+# Pandas
+dados = pd.read_csv('file.csv')
+
+# Funções
+
+
+def imprime(n=1):  # Função com parametros com valroes Default
+    print("esta é uma função")
+    return n * n
+
+
+imprime(3)
