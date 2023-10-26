@@ -84,5 +84,3 @@ print(diagonal)
 import numpy as np
 ale = np.random.random((1))
 print(ale)
-
-# Exemplos com Pandas
